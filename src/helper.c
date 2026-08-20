@@ -4,11 +4,11 @@
 _Static_assert(sizeof(XCHAR) == sizeof(wchar_t), "XCHAR must match wchar_t size");
 
 // Set Pascal string max length here:
-#define MAX_STR_LEN 32768
+#define MAX_STR_LEN 256
 
-// Max Pascal string length, INCLUDING first len character. 64kb is fine.
+// Max Pascal string length, INCLUDING first len character.
 // Access only through helper
-static XCHAR buf[MAX_STR_LEN];
+static XCHAR strbuf[MAX_STR_LEN];
 
 // XLOPER12 buffer, just needed to pass strings to Excel
 // Access only through helper
@@ -16,17 +16,17 @@ static XLOPER12 xlOperBuf;
 
 // Copies over a null-terminated wide string and makes it Excel-Pascal friendly in a global buffer
 // NOT THREAD SAFE!! Buffer gets clobbered on every call to MakePascal.
-// Silently truncates at strings over 32,767 characters. Do I care? No, no I do not.
+// Silently truncates at strings over MAX_STR_LEN characters. Do I care? No, no I do not.
 static XCHAR *MakePascal(const wchar_t* str) {
 
     size_t len = wcslen(str);
     // Cap max length
     len = (len > MAX_STR_LEN - 1) ? MAX_STR_LEN - 1 : len;
 
-    buf[0] = (XCHAR)len;
-    memcpy(&buf[1], str, len * sizeof(XCHAR));
+    strbuf[0] = (XCHAR)len;
+    memcpy(&strbuf[1], str, len * sizeof(XCHAR));
 
-    return buf;
+    return strbuf;
 }
 
 // Public API, NOT THREAD SAFE ------------------------------------------------------
