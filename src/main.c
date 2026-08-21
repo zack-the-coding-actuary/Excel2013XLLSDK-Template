@@ -4,6 +4,17 @@
 
 /* Wrappers ----------------------------------------------------------------- */
 
+static wchar_t *xloper12_sum_strs[] = {
+L"xloper12_sum",
+L"QQ",
+L"SAFE_SUM",
+L"range",
+L"Safe sum of an Excel range",
+L"Range to sum over"
+};
+
+static size_t xloper12_sum_len = sizeof(xloper12_sum_strs) / sizeof(xloper12_sum_strs[0]);
+
 __declspec(dllexport) LPXLOPER12 WINAPI xloper12_sum(LPXLOPER12 range)
 {
     double acc = 0;
@@ -20,6 +31,17 @@ __declspec(dllexport) LPXLOPER12 WINAPI xloper12_sum(LPXLOPER12 range)
     return DoubleToXL(acc);
 }
 
+static wchar_t *fp12_sum_strs[] = {
+L"fp12_sum",
+L"BK%",
+L"UNSAFE_SUM",
+L"range",
+L"Unsafe sum of an Excel range",
+L"Range to sum over"
+};
+
+static size_t fp12_sum_len = sizeof(fp12_sum_strs) / sizeof(fp12_sum_strs[0]);
+
 __declspec(dllexport) double WINAPI fp12_sum(FP12 *range)
 {
     double acc = 0;
@@ -29,44 +51,34 @@ __declspec(dllexport) double WINAPI fp12_sum(FP12 *range)
     return acc;
 }
 
+static wchar_t *triple_sum_strs[] = {
+L"triple_sum",
+L"BBBB",
+L"TRIP_SUM",
+L"X, Y, Z",
+L"Sum of three doubles",
+L"1st double",
+L"2nd double",
+L"3rd double"
+};
+
+static size_t triple_sum_len = sizeof(triple_sum_strs) / sizeof(triple_sum_strs[0]);
+
+__declspec(dllexport) double WINAPI triple_sum(double a, double b, double c) {
+    return a + b + c;
+}
+
 /* Required XLL entry points ------------------------------------------------ */
 
 __declspec(dllexport) int WINAPI xlAutoOpen(void)
 {
-    XLOPER12 xDLL;
-    XLOPER12 xProcName;
-    XLOPER12 xTypeText;
-    XLOPER12 xFuncText;
-    XLOPER12 xArgText;
-    XLOPER12 xMacroType;
-    XLOPER12 xFunctionHelp;
-    XLOPER12 xArgumentHelp1;
+    if (!AllocateRegistrationBuf()) return 0;
 
-    Excel12(xlGetName, &xDLL, 0);
+    RegisterFunc(xloper12_sum_strs, xloper12_sum_len);
+    RegisterFunc(fp12_sum_strs, fp12_sum_len);
+    RegisterFunc(triple_sum_strs, triple_sum_len);
 
-    xProcName.xltype      = xltypeStr; xProcName.val.str      = (XCHAR *)L"\x0Cxloper12_sum";
-    xTypeText.xltype      = xltypeStr; xTypeText.val.str      = (XCHAR *)L"\x02QQ";
-    xFuncText.xltype      = xltypeStr; xFuncText.val.str      = (XCHAR *)L"\x08SAFE_SUM";
-    xArgText.xltype       = xltypeStr; xArgText.val.str       = (XCHAR *)L"\x07rangeee";
-    xMacroType.xltype     = xltypeInt; xMacroType.val.w       = 1;
-    xFunctionHelp.xltype  = xltypeStr; xFunctionHelp.val.str  = (XCHAR *)L"\x1ASafe sum of an Excel range";
-    xArgumentHelp1.xltype = xltypeStr; xArgumentHelp1.val.str = (XCHAR *)L"\x11Range to sum over";
-
-    Excel12(xlfRegister, 0, 11,
-        &xDLL, &xProcName, &xTypeText, &xFuncText, &xArgText, &xMacroType, NULL, NULL, NULL, &xFunctionHelp, &xArgumentHelp1);
-
-    xProcName.xltype  = xltypeStr; xProcName.val.str  = (XCHAR *)L"\x08" L"fp12_sum";
-    xTypeText.xltype  = xltypeStr; xTypeText.val.str  = (XCHAR *)L"\x03" L"BK%";
-    xFuncText.xltype  = xltypeStr; xFuncText.val.str  = (XCHAR *)L"\x0AUNSAFE_SUM";
-    xArgText.xltype   = xltypeStr; xArgText.val.str   = (XCHAR *)L"\x05range";
-    xMacroType.xltype = xltypeInt; xMacroType.val.w   = 1;
-    xFunctionHelp.xltype  = xltypeStr; xFunctionHelp.val.str  = (XCHAR *)L"\x1CUnsafe sum of an Excel range";
-    xArgumentHelp1.xltype = xltypeStr; xArgumentHelp1.val.str = (XCHAR *)L"\x11Range to sum over";
-
-    Excel12(xlfRegister, 0, 11,
-        &xDLL, &xProcName, &xTypeText, &xFuncText, &xArgText, &xMacroType, NULL, NULL, NULL, &xFunctionHelp, &xArgumentHelp1);
-
-    Excel12(xlFree, 0, 1, &xDLL);
+    FreeRegistrationBuf();
 
     return 1;
 }
@@ -95,7 +107,7 @@ __declspec(dllexport) LPXLOPER12 WINAPI xlAddInManagerInfo12(LPXLOPER12 pxAction
 {
     static XLOPER12 xInfo;
     static XLOPER12 xIntAction;
-    static XCHAR szName[] = L"\x08Template";
+    static XCHAR szName[] = L"\x08" L"Template";
     XLOPER12 xCoerceType;
 
     xCoerceType.xltype = xltypeInt;
@@ -114,22 +126,4 @@ __declspec(dllexport) LPXLOPER12 WINAPI xlAddInManagerInfo12(LPXLOPER12 pxAction
     }
 
     return &xInfo;
-}
-
-/* -------------------------------------------------------------------------- */
-
-// More no touchy
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
-{
-    (void)hModule;
-    (void)lpReserved;
-    switch (ul_reason_for_call)
-    {
-    case DLL_PROCESS_ATTACH:
-    case DLL_THREAD_ATTACH:
-    case DLL_THREAD_DETACH:
-    case DLL_PROCESS_DETACH:
-        break;
-    }
-    return TRUE;
 }

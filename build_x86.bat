@@ -13,7 +13,7 @@ rem Include all source files here, enter space + src\FILENAME.c(pp) for each.
 rem C and C++ sources are compiled separately below so each gets its own
 rem language mode and /std version rather than forcing everything to C++.
 set SRC_CPP=src\XLCALL.CPP
-set SRC_C=src\main.c src\helper.c
+set SRC_C=src\main.c src\helper.c src\tls.c
 
 set LIB_XLCALL=lib\x86\XLCALL32.LIB user32.lib
 set COMMON=/nologo /W4 /DWIN32 /D_WINDOWS /D_USRDLL
