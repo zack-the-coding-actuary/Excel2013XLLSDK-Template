@@ -8,8 +8,9 @@
 // Max # of args for Excel12v for xlfRegister, per documentation
 #define MAX_ARG_LEN 255
 
-// Amount to allocate for per-UDF docstring registration, using 1MB as a ceiling
+// Amount to allocate for per-UDF docstring registration, using 1MB as a ceiling and max Pascal string length per string
 #define STR_ARENA_SIZE (1024 * 512 * sizeof(wchar_t))
+#define MAX_STR_LEN 32767
 
 LPXLOPER12 DoubleToXL(double d);
 LPXLOPER12 LStrToXL(const wchar_t* str);

@@ -18,10 +18,11 @@ BOOL TLS_Action(DWORD DllMainCallReason)
     case DLL_PROCESS_DETACH: // The DLL is being unloaded.
         TlsFree(TlsIndex); // Release the TLS index.
         break;
-    case DLL_THREAD_DETACH: // Free TLS buffer
+    case DLL_THREAD_DETACH: { // Free TLS buffer
         void *pTLS = TlsGetValue(TlsIndex);
         if (pTLS) VirtualFree(pTLS, 0, MEM_RELEASE);
         break;
+        }
     }
 
     return TRUE;

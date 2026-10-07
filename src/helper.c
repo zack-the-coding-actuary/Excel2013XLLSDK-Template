@@ -16,7 +16,7 @@ static void MakePascal(const wchar_t* str) {
     len = (len > STR_BUF_LEN) ? STR_BUF_LEN : len;
 
     tls_data->buf.xlStr.len = (XCHAR)len;
-    memcpy(&(tls_data->buf.xlStr.strBuf), str, len * sizeof(XCHAR));
+    memcpy(tls_data->buf.xlStr.strBuf, str, len * sizeof(XCHAR));
 }
 
 // Registration API internals ---------------------------------------------------------------------
@@ -157,12 +157,14 @@ void RegisterFunc(wchar_t *metadata[], size_t len) {
     if (len < 3 || len > 249) return;
 
     size_t i = 0;
+    size_t currlen;
 
     // Copy string into arena, pass pointer into arena to xlRegisterBuf
-    // Safe to assume no individual string is over 2^15 - 1 long
+    // Silently truncates strings over 32767 long
     for (; i < 3; ++i) {
-        regStrBuf[bump_ptr] = (wchar_t)wcslen(metadata[i]);
-        wcscpy(&regStrBuf[bump_ptr + 1], metadata[i]);
+        currlen = wcslen(metadata[i]);
+        regStrBuf[bump_ptr] = (currlen > MAX_STR_LEN) ? MAX_STR_LEN : (wchar_t)currlen;
+        wcscpy_s(&regStrBuf[bump_ptr + 1], STR_ARENA_SIZE / sizeof(wchar_t) - bump_ptr - 1, metadata[i]);
         xlRegisterBuf[i + 1].val.str = &regStrBuf[bump_ptr];
         bump_ptr += regStrBuf[bump_ptr] + 1;
     }
@@ -174,15 +176,17 @@ void RegisterFunc(wchar_t *metadata[], size_t len) {
     }
     // Otherwise, keep going and increment i to 4
     else {
-        regStrBuf[bump_ptr] = (wchar_t)wcslen(metadata[i]);
-        wcscpy(&regStrBuf[bump_ptr + 1], metadata[i++]);
+        currlen = wcslen(metadata[i]);
+        regStrBuf[bump_ptr] = (currlen > MAX_STR_LEN) ? MAX_STR_LEN : (wchar_t)currlen;
+        wcscpy_s(&regStrBuf[bump_ptr + 1], STR_ARENA_SIZE / sizeof(wchar_t) - bump_ptr - 1, metadata[i++]);
         xlRegisterBuf[4].val.str = &regStrBuf[bump_ptr];
         bump_ptr += regStrBuf[bump_ptr] + 1;
 
         // We now skip 5 entries in xlRegisterBuf
         for (; i < len; ++i) {
-            regStrBuf[bump_ptr] = (wchar_t)wcslen(metadata[i]);
-            wcscpy(&regStrBuf[bump_ptr + 1], metadata[i]);
+            currlen = wcslen(metadata[i]);
+            regStrBuf[bump_ptr] = (currlen > MAX_STR_LEN) ? MAX_STR_LEN : (wchar_t)currlen;
+            wcscpy_s(&regStrBuf[bump_ptr + 1], STR_ARENA_SIZE / sizeof(wchar_t) - bump_ptr - 1, metadata[i]);
             xlRegisterBuf[i + 5].val.str = &regStrBuf[bump_ptr];
             bump_ptr += regStrBuf[bump_ptr] + 1;
         }
