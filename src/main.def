@@ -1,0 +1,10 @@
+LIBRARY
+
+EXPORTS
+    xlAutoOpen
+    xlAutoClose
+    xlAutoFree12
+    xlAddInManagerInfo12
+    xloper12_sum
+    fp12_sum
+    triple_sum
