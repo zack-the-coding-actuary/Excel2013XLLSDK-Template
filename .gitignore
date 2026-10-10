@@ -10,3 +10,6 @@ src/ReadMe.txt
 # Build output
 /bin/
 /obj/
+
+# .bat files
+*.bat
